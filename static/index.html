@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gomoku Board</title>
+    <style>
+        canvas {
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="board" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('board');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const cellSize = canvas.width / gridSize;
+
+        // 初始化棋盘
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.strokeStyle = '#000';
+            for (let i = 0; i <= gridSize; i++) {
+                ctx.moveTo(i * cellSize, 0);
+                ctx.lineTo(i * cellSize, canvas.height);
+                ctx.moveTo(0, i * cellSize);
+                ctx.lineTo(canvas.width, i * cellSize);
+            }
+            ctx.stroke();
+        }
+
+        // 根据点击位置放置圆形
+        async function handleClick(event) {
+            const x = Math.floor(event.offsetX / cellSize);
+            const y = Math.floor(event.offsetY / cellSize);
+
+            // 发送点击事件到 Rust 服务器
+            const response = await fetch(`/click/${x}${y}`);
+            const data = await response.text();
+            console.log(data);
+
+            // 在点击位置绘制圆圈
+            ctx.beginPath();
+            ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 2 - 2, 0, Math.PI * 2);
+            ctx.fillStyle = (x + y) % 2 === 0 ? '#000' : '#fff'; // 黑白交替
+            ctx.fill();
+        }
+
+        // 初始化
+        drawBoard();
+
+        // 绑定点击事件
+        canvas.addEventListener('click', handleClick);
+    </script>
+</body>
+</html>
