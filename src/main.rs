@@ -55,7 +55,7 @@ async fn doc() -> impl IntoResponse {
    Html(html_output)
 }
 
-async fn click(Path(id): Path<u64>) -> impl IntoResponse {
+async fn click(Path(id): Path<String>) -> impl IntoResponse {
    // 使用全局变量存储点击事件
    println!("{}",id);
 

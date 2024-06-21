@@ -38,8 +38,10 @@
             const x = Math.floor(event.offsetX / cellSize);
             const y = Math.floor(event.offsetY / cellSize);
 
+            const id = 20*(20-y)+x;
+            const paddedId = `${id}:`.padEnd(4, ' ');
             // 发送点击事件到 Rust 服务器
-            const response = await fetch(`/click/${x}${y}`);
+            const response = await fetch(`/click/${paddedId} ${x}, ${y}`);
             const data = await response.text();
             console.log(data);
 
