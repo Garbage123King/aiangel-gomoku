@@ -12,12 +12,15 @@
     </style>
 </head>
 <body>
-    <canvas id="board" width="400" height="400"></canvas>
+    <canvas id="board" width="800" height="800"></canvas>
     <script>
         const canvas = document.getElementById('board');
         const ctx = canvas.getContext('2d');
         const gridSize = 20;
         const cellSize = canvas.width / gridSize;
+        let color = 0; //black
+        // Initialize the board array with null values
+        const board = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
 
         // 初始化棋盘
         function drawBoard() {
@@ -36,20 +39,28 @@
         // 根据点击位置放置圆形
         async function handleClick(event) {
             const x = Math.floor(event.offsetX / cellSize);
-            const y = Math.floor(event.offsetY / cellSize);
+            const y = gridSize - 1 - Math.floor(event.offsetY / cellSize);
+            // Ignore click if the cell is already occupied
+            if (board[y][x] !== null) {
+                return;
+            }
+            board[y][x] = color;
 
-            const id = 20*(20-y)+x;
-            const paddedId = `${id}:`.padEnd(4, ' ');
+            // const paddedId = `${id}:`.padEnd(4, ' ');
             // 发送点击事件到 Rust 服务器
-            const response = await fetch(`/click/${paddedId} ${x}, ${y}`);
+            const response = await fetch(`/click/${x}, ${y}`);
             const data = await response.text();
             console.log(data);
 
             // 在点击位置绘制圆圈
+            ctx.lineWidth = 1.5; // 设置线条粗细为3像素
             ctx.beginPath();
-            ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 2 - 2, 0, Math.PI * 2);
-            ctx.fillStyle = (x + y) % 2 === 0 ? '#000' : '#fff'; // 黑白交替
+            ctx.arc(x * cellSize + cellSize / 2, (gridSize - 1 -y) * cellSize + cellSize / 2, cellSize / 2 - 2, 0, Math.PI * 2);
+            ctx.fillStyle = color === 0 ? '#000' : '#fff'; // 黑白交替
+            color = 1 - color;
             ctx.fill();
+            ctx.strokeStyle = '#000'; // 设置线条颜色为黑色
+            ctx.stroke(); // 绘制圆圈的线条
         }
 
         // 初始化
